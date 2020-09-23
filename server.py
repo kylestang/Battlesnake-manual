@@ -11,7 +11,6 @@ For instructions see https://github.com/BattlesnakeOfficial/starter-snake-python
 
 class Battlesnake(object):
     direction = "up"
-    updated = False
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
@@ -45,31 +44,14 @@ class Battlesnake(object):
         # This function is called on every turn of a game. It's how your snake decides where to move.
         # Valid moves are "up", "down", "left", or "right".
         # TODO: Use the information in cherrypy.request.json to decide your next move.
-        current_time = time.time_ns()
 
         data = cherrypy.request.json
 
-        timeout = current_time + ((data["game"]["timeout"] - 100) * 1000000)
-        move = "up"
+        timeout = (data["game"]["timeout"] - 100) / 1000.0
+        time.sleep(timeout)
 
-        while(time.time_ns() < timeout):
-            if keyboard.is_pressed("w"):
-                move = "up"
-                break
-            if keyboard.is_pressed("s"):
-                move = "down"
-                break
-            if keyboard.is_pressed("a"):
-                move = "left"
-                break
-            if keyboard.is_pressed("d"): 
-                move = "right"
-                break
-
-            time.sleep(0.001)
-
-        print(f"MOVE: {move}")
-        return {"move": move}
+        print(f"MOVE: {self.direction}")
+        return {"move": self.direction}
 
     @cherrypy.expose
     @cherrypy.tools.json_in()
@@ -80,6 +62,13 @@ class Battlesnake(object):
 
         print("END")
         return "ok"
+    
+    @cherrypy.expose
+    @cherrypy.tools.json_in()
+    def key(self):
+        data = cherrypy.request.json
+
+        self.direction = data["direction"]
 
 
 if __name__ == "__main__":
